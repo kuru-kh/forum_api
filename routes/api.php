@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\ForumController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +18,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::group(['prefix' => 'v1'], function() {
+    Route::post('register', [UserController::class, 'register']);
+    Route::post('login', [UserController::class, 'login'])->name('login');
+    Route::group(['middleware' => 'auth:sanctum', 'where' => ['forum' => '[0-9]+']], function() {
+        Route::get('forums/pending', [ForumController::class, 'pendingList']);
+        Route::apiResource('forums', ForumController::class);
+        Route::post('forums/{forum}/comment', [ForumController::class, 'postForumComment']);
+    });
 });
